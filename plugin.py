@@ -87,7 +87,7 @@ class Plugin(object):
             "notify",
             data=(
                 self.ctx,
-                {"text": res, "title": PLUGIN_NAME, "duration": -1},
+                {"text": res, "title": PLUGIN_NAME, "duration": 3000 + len(res) * 200},
             ),
         )
         print(res)
