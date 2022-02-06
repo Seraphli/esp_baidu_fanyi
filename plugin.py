@@ -80,12 +80,12 @@ class Plugin(object):
             raise Exception(f"Please set appid and appkey in {PLUGIN_SETTING}")
         self.fanyi_api = BaiduFanyi(self.cfg["appid"], self.cfg["appkey"])
         self.api = PluginApi(self)
-    
+
     async def trans(self, content):
         res = self.fanyi_api.form_result(self.fanyi_api.translate(content))
         await sio.emit(
             "notify",
-            data=(self.ctx, res, PLUGIN_NAME),
+            data=(self.ctx, {"text": res, "title": PLUGIN_NAME}),
         )
         print(res)
 
@@ -100,7 +100,7 @@ class Plugin(object):
         except:
             self.cfg = {"appid": "", "appkey": ""}
         self.save_cfg()
-    
+
     def save_cfg(self):
         with codecs.open(PLUGIN_SETTING, "w") as f:
             json.dump(self.cfg, f)
@@ -121,7 +121,7 @@ class Plugin(object):
         await sio.emit("add_input_hook", data=(self.ctx, "bf"))
         await sio.emit(
             "notify",
-            data=(self.ctx, "翻译已启动.", PLUGIN_NAME),
+            data=(self.ctx, {"text": "翻译已启动.", "title": PLUGIN_NAME}),
         )
 
     async def loop(self):
