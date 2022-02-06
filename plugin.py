@@ -124,7 +124,7 @@ class Plugin(object):
         await sio.emit("add_input_hook", data=(self.ctx, "bf"))
         await sio.emit(
             "notify",
-            data=(self.ctx, {"text": "翻译已启动. 翻译结果将通过通知形式显示, 点击通知以消除.", "title": PLUGIN_NAME}),
+            data=(self.ctx, {"text": "翻译已启动. 翻译结果将通过通知形式显示.", "title": PLUGIN_NAME}),
         )
 
     async def loop(self):
