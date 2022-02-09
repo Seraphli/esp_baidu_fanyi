@@ -6,6 +6,7 @@ import socketio
 import uuid
 from baidu_fanyi_api import BaiduFanyi
 import pyperclip
+import sys
 
 APP_NAME = "electron-spirit"
 PLUGIN_NAME = "ES Baidu Fanyi"
@@ -25,6 +26,7 @@ class PluginApi(socketio.AsyncClientNamespace):
 
     def on_disconnect(self):
         print("Disconnected")
+        sys.exit(0)
 
     def on_echo(self, data):
         print("Echo:", data)
