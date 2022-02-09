@@ -5,11 +5,13 @@ import asyncio
 import socketio
 import uuid
 from baidu_fanyi_api import BaiduFanyi
+import pyperclip
 
 APP_NAME = "electron-spirit"
 PLUGIN_NAME = "ES Baidu Fanyi"
 SHORT_NAME = "bfanyi"
 PLUGIN_SETTING = "plugin.setting.json"
+DEFAULT_CONFIG = {"appid": "", "appkey": "", "clipboard": True}
 
 
 class PluginApi(socketio.AsyncClientNamespace):
@@ -90,6 +92,8 @@ class Plugin(object):
                 {"text": res, "title": PLUGIN_NAME, "duration": 3000 + len(res) * 200},
             ),
         )
+        if self.cfg["clipboard"]:
+            pyperclip.copy(res)
         print(res)
 
     def load_config(self):
@@ -100,8 +104,11 @@ class Plugin(object):
         try:
             with codecs.open(PLUGIN_SETTING) as f:
                 self.cfg = json.load(f)
+            for k in DEFAULT_CONFIG:
+                if k not in self.cfg or type(self.cfg[k]) != type(DEFAULT_CONFIG[k]):
+                    self.cfg[k] = DEFAULT_CONFIG[k]
         except:
-            self.cfg = {"appid": "", "appkey": ""}
+            self.cfg = DEFAULT_CONFIG
         self.save_cfg()
 
     def save_cfg(self):
@@ -124,7 +131,7 @@ class Plugin(object):
         await sio.emit("add_input_hook", data=(self.ctx, "bf"))
         await sio.emit(
             "notify",
-            data=(self.ctx, {"text": "翻译已启动. 翻译结果将通过通知形式显示.", "title": PLUGIN_NAME}),
+            data=(self.ctx, {"text": "翻译已启动. 翻译结果将通过通知形式显示, 也可以复制到剪贴板中.", "title": PLUGIN_NAME}),
         )
 
     async def loop(self):
