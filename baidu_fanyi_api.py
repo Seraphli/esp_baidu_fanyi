@@ -1,6 +1,5 @@
 import requests
 import random
-import json
 from hashlib import md5
 
 HEADERS = {"Content-Type": "application/x-www-form-urlencoded"}
