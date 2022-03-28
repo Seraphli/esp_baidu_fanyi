@@ -139,13 +139,13 @@ class Plugin(object):
             json.dump(self.cfg, f)
 
     async def setup_connect(self):
+        print("Setup connect")
         await sio.emit("addInputHook", data=("bf"))
         await sio.emit(
             "notify",
-            data=(
-                {"text": "翻译已启动. 翻译结果将通过通知形式显示, 也可以复制到剪贴板中.", "title": PLUGIN_NAME},
-            ),
+            data=({"text": "翻译已启动. 翻译结果将通过通知形式显示, 也可以复制到剪贴板中.", "title": PLUGIN_NAME},),
         )
+        print("Setup connect done")
 
     async def loop(self):
         await sio.connect(f"http://localhost:{self.port}")
@@ -153,8 +153,17 @@ class Plugin(object):
 
 
 if __name__ == "__main__":
-    # asyncio
-    sio = socketio.AsyncClient()
-    p = Plugin()
-    sio.register_namespace(p.api)
-    asyncio.run(p.loop())
+    while True:
+        try:
+            # asyncio
+            sio = socketio.AsyncClient()
+            p = Plugin()
+            sio.register_namespace(p.api)
+            asyncio.run(p.loop())
+        except RuntimeError:
+            pass
+        except:
+            import traceback
+
+            traceback.print_exc()
+            break
