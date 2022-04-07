@@ -34,7 +34,7 @@ class PluginApi(socketio.AsyncClientNamespace):
 
     async def on_connect(self):
         print("Connected")
-        if (self.connected):
+        if self.connected:
             print("Disconnect because already connected")
             asyncio.get_running_loop().stop()
             return
@@ -100,7 +100,8 @@ class PluginApi(socketio.AsyncClientNamespace):
 
     async def on_processContent(self, content):
         print("Process content:", content)
-        await self.parent.trans(content)
+        hook = content.split(" ")[0]
+        await self.parent.hooks[hook](content[len(hook) + 1 :])
 
     def on_modeFlag(self, flags):
         print("Mode flag:", flags)
@@ -123,9 +124,15 @@ class Plugin(object):
             raise Exception(f"Please set appid and appkey in {PLUGIN_SETTING}")
         self.fanyi_api = BaiduFanyi(self.cfg["appid"], self.cfg["appkey"])
         self.api = PluginApi(self)
+        self.hooks = {
+            "fy": lambda x: self.trans(x, "zh"),
+            "fye": lambda x: self.trans(x, "en"),
+        }
 
-    async def trans(self, content):
-        res = self.fanyi_api.form_result(self.fanyi_api.translate(content))
+    async def trans(self, content, to_lang):
+        res = self.fanyi_api.form_result(
+            self.fanyi_api.translate(content, to_lang=to_lang)
+        )
         await sio.emit(
             "notify",
             data=(
@@ -157,7 +164,8 @@ class Plugin(object):
 
     async def setup_connect(self):
         print("Setup connect")
-        await sio.emit("addInputHook", data=("bf"))
+        for hook in self.hooks.keys():
+            await sio.emit("addInputHook", data=(hook))
         await sio.emit(
             "notify",
             data=({"text": "翻译已启动. 翻译结果将通过通知形式显示, 也可以复制到剪贴板中.", "title": PLUGIN_NAME},),
