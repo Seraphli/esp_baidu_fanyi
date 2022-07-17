@@ -136,7 +136,11 @@ class Plugin(object):
         await sio.emit(
             "notify",
             data=(
-                {"text": res, "title": PLUGIN_NAME, "duration": 3000 + len(res) * 200},
+                {
+                    "text": res,
+                    "title": PLUGIN_NAME,
+                    "duration": min(max(3000, len(res) * 200), 10000),
+                },
             ),
         )
         if self.cfg["clipboard"]:
@@ -144,7 +148,7 @@ class Plugin(object):
         print(res)
 
     def load_config(self):
-        path = user_data_dir(APP_NAME, False, roaming=True)
+        path = user_config_dir(APP_NAME, False, roaming=True)
         with codecs.open(path + "/api.json") as f:
             config = json.load(f)
         self.port = config["apiPort"]
